@@ -34,6 +34,19 @@ df -hT
 lsblk
 
 ################################################
+# EXTEND LOLGICAL VOLUME WITH NEWLY ADDED DISK
+################################################
+
+lsblk
+pvcreate /dev/sdC
+vgs
+vgextend vg00 /dev/sdc
+lvs
+lvextend -l +100%FREE /dev/vg00/new_lv
+xfs_growfs /dev/vg00/new_lv
+df -hT
+
+################################################
 # REMOVE FILESYSTEM AND LOGICAL VOLUME
 ################################################
 
