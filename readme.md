@@ -1,4 +1,15 @@
-```sh
+quick evaluation
+```bash
+lsblk
+sudo parted /dev/sda print free
+sudo pvs /dev/sda3
+sudo vgs rootvg
+sudo lvs /dev/mapper/rootvg-opt
+df -h /opt
+```
+
+CREATE LOLGICAL VOLUME AND MOUNT FILESYSTEM
+```bash
 ################################################
 # CREATE LOLGICAL VOLUME AND MOUNT FILESYSTEM
 ################################################
@@ -32,7 +43,10 @@ mount /dev/vg00/new_lv /newpartition/
 # proof
 df -hT
 lsblk
+```
 
+EXTEND LOLGICAL VOLUME WITH NEWLY ADDED DISK
+```bash
 ################################################
 # EXTEND LOLGICAL VOLUME WITH NEWLY ADDED DISK
 ################################################
@@ -45,7 +59,10 @@ lvs
 lvextend -l +100%FREE /dev/vg00/new_lv
 xfs_growfs /dev/vg00/new_lv
 df -hT
+```
 
+REMOVE FILESYSTEM AND LOGICAL VOLUME
+```bash
 ################################################
 # REMOVE FILESYSTEM AND LOGICAL VOLUME
 ################################################
