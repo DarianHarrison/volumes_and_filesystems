@@ -98,7 +98,7 @@ wipefs -af /dev/sdb
 ```
 
 To extend a logical volume partition and filesystem after a virtual disk has been expanded 
-```
+```bash
 ################################################
 # 1. FIX GPT BACKUP HEADER
 ################################################
