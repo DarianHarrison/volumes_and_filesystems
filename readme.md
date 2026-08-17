@@ -79,3 +79,57 @@ lsblk
 # wipe signature and metadata/magic strings from the physical device
 wipefs -af /dev/sdb
 ```
+
+To extend a logical volume partition and filesystem after a virtual disk has been expanded 
+```
+################################################
+# 1. FIX GPT BACKUP HEADER
+################################################
+# READ BEFORE: Check for the GPT warning and locate the Free Space
+sudo parted /dev/sda print free
+
+# ACTION: Safely move the GPT backup header to the end of the 256GB boundary
+sudo sgdisk -e /dev/sda
+
+# PROOF AFTER: Verify the warning is gone and the 157GB Free Space is at the bottom
+sudo parted /dev/sda print free
+
+################################################
+# 2. GROW THE PHYSICAL PARTITION
+################################################
+# READ BEFORE: Check the current size of partition 3 (should be ~108G)
+lsblk /dev/sda
+
+# ACTION: Expand partition 3 to consume the unallocated raw space
+sudo growpart /dev/sda 3
+
+# PROOF AFTER: Verify partition 3 has grown to fill the disk (should be ~254G)
+lsblk /dev/sda
+
+################################################
+# 3. RESIZE THE PHYSICAL VOLUME (LVM)
+################################################
+# READ BEFORE: Check current physical free space on sda3 (should be <14G)
+sudo pvs /dev/sda3
+
+# ACTION: Tell LVM the underlying partition (/dev/sda3) has grown
+sudo pvresize /dev/sda3
+
+# PROOF AFTER: Verify the new space is registered in LVM (PFree should be ~171G)
+sudo pvs /dev/sda3
+
+################################################
+# 4. EXTEND LOGICAL VOLUME & FILESYSTEM
+################################################
+# READ BEFORE: Check current size of /opt at the LVM and OS levels (should be 10G)
+sudo lvs /dev/mapper/rootvg-opt
+df -h /opt
+
+# ACTION: Expand /opt to exactly 128GB (-r handles the filesystem expansion automatically)
+sudo lvextend -r -L 128G /dev/mapper/rootvg-opt
+
+# PROOF AFTER: Confirm /opt is exactly 128GB and check remaining free space in rootvg
+sudo lvs /dev/mapper/rootvg-opt
+df -h /opt
+sudo vgs rootvg
+```
